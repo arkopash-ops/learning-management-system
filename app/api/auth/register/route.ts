@@ -6,6 +6,8 @@ import bcrypt from 'bcrypt';
 import { attachAuthCookie } from "@/lib/cookies";
 import { UserRole } from "@/shared/enum/UserRole.enum";
 import InstructorModel from "@/models/instructor.model";
+import LearnerModel from "@/models/learner.model";
+import { EducationLevel } from "@/shared/enum/EducationLevel.enum";
 
 export async function POST(req: NextRequest) {
     try {
@@ -44,6 +46,15 @@ export async function POST(req: NextRequest) {
                 subjects: [],
                 bio: "",
                 education: [],
+            });
+        }
+
+        if (role === UserRole.LEARNER) {
+            await LearnerModel.create({
+                learnerId: user._id,
+                bio: "",
+                educationLevel: EducationLevel.SCHOOL,
+                interests: [],
             });
         }
 
