@@ -45,6 +45,7 @@ export async function POST(req: NextRequest) {
                 instructorId: user._id,
                 subjects: [],
                 bio: "",
+                dateOfBirth: "",
                 education: [],
             });
         }
@@ -53,6 +54,7 @@ export async function POST(req: NextRequest) {
             await LearnerModel.create({
                 learnerId: user._id,
                 bio: "",
+                dateOfBirth: "",
                 educationLevel: EducationLevel.SCHOOL,
                 interests: [],
             });
