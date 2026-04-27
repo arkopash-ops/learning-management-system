@@ -4,6 +4,8 @@ import { signToken } from "@/lib/auth";
 import UserModel from "@/models/user.model";
 import bcrypt from 'bcrypt';
 import { attachAuthCookie } from "@/lib/cookies";
+import { UserRole } from "@/shared/enum/UserRole.enum";
+import InstructorModel from "@/models/instructor.model";
 
 export async function POST(req: NextRequest) {
     try {
@@ -35,6 +37,15 @@ export async function POST(req: NextRequest) {
             password: hashedPassword,
             role,
         });
+
+        if (role === UserRole.INSTRUCTOR) {
+            await InstructorModel.create({
+                instructorId: user._id,
+                subjects: [],
+                bio: "",
+                education: [],
+            });
+        }
 
         const token = signToken({
             userId: user._id.toString(),
