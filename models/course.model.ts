@@ -1,7 +1,7 @@
 import { CourseDocument } from "@/shared/types/course.types";
 import { model, models, Schema } from "mongoose";
 
-const CourseSchema = new Schema({
+const CourseSchema = new Schema<CourseDocument>({
     title: {
         type: String,
         required: true,
@@ -40,7 +40,7 @@ const CourseSchema = new Schema({
         type: Number,
         default: 0
     },
-});
+}, { timestamps: true });
 
 const CourseModel = models.Course ||
     model<CourseDocument>("Course", CourseSchema);

@@ -29,7 +29,7 @@ const UserSchema = new Schema<UserDocument>({
         enum: Object.values(UserRole),
         required: true,
     },
-});
+}, { timestamps: { createdAt: true, updatedAt: false } });
 
 const UserModel = models.User ||
     model<UserDocument>("User", UserSchema);

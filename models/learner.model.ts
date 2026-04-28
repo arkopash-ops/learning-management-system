@@ -2,7 +2,7 @@ import { model, models, Schema } from 'mongoose';
 import { LearnerDocument } from '../shared/types/learner.types';
 import { EducationLevel } from '@/shared/enum/EducationLevel.enum';
 
-const LearnerSchema = new Schema({
+const LearnerSchema = new Schema<LearnerDocument>({
     userId: {
         type: Schema.Types.ObjectId,
         ref: "User",
@@ -25,7 +25,7 @@ const LearnerSchema = new Schema({
     },
 
     interests: { type: [String] },
-});
+}, { timestamps: true });
 
 const LearnerModel = models.Learner ||
     model<LearnerDocument>("Learner", LearnerSchema);

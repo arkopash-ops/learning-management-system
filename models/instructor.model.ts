@@ -31,7 +31,7 @@ const InstructorSchema = new Schema<InstructoreDocument>({
         type: [EducationSchema],
         default: [],
     },
-});
+}, { timestamps: true });
 
 const InstructorModel = models.Instructor ||
     model<InstructoreDocument>("Instructor", InstructorSchema);
