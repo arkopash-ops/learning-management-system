@@ -8,7 +8,7 @@ const EducationSchema = new Schema({
 });
 
 const InstructorSchema = new Schema<InstructoreDocument>({
-    instructorId: {
+    userId: {
         type: Schema.Types.ObjectId,
         ref: "User",
         required: true,

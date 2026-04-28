@@ -2,7 +2,7 @@ import { Document, Types } from "mongoose";
 import { EducationLevel } from "../enum/EducationLevel.enum";
 
 export interface ILearner {
-    learnerId: Types.ObjectId;
+    userId: Types.ObjectId;
     bio: string;
     dateOfBirth: Date;
     educationLevel: EducationLevel;

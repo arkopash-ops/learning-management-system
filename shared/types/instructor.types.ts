@@ -7,7 +7,7 @@ export interface IEducation {
 }
 
 export interface IInstructore {
-    instructorId: Types.ObjectId;
+    userId: Types.ObjectId;
     subjects: string[];
     bio: string;
     dateOfBirth: Date;

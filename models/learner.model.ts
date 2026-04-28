@@ -3,7 +3,7 @@ import { LearnerDocument } from '../shared/types/learner.types';
 import { EducationLevel } from '@/shared/enum/EducationLevel.enum';
 
 const LearnerSchema = new Schema({
-    learnerId: {
+    userId: {
         type: Schema.Types.ObjectId,
         ref: "User",
         required: true,

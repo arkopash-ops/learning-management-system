@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
 
         if (role === UserRole.INSTRUCTOR) {
             await InstructorModel.create({
-                instructorId: user._id,
+                userId: user._id,
                 subjects: [],
                 bio: "",
                 dateOfBirth: "",
@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
 
         if (role === UserRole.LEARNER) {
             await LearnerModel.create({
-                learnerId: user._id,
+                userId: user._id,
                 bio: "",
                 dateOfBirth: "",
                 educationLevel: EducationLevel.SCHOOL,
