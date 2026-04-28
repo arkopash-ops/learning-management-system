@@ -4,6 +4,8 @@ import CourseModel from "@/models/course.model";
 import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/auth";
 
+
+// api for publish and unpublish Course
 export async function PATCH(
     req: NextRequest,
     context: { params: Promise<{ id: string }> }
@@ -14,7 +16,7 @@ export async function PATCH(
         const { id } = await context.params;
         if (!id) {
             return NextResponse.json(
-                { success: false, message: "Supplier ID is required" },
+                { success: false, message: "ID is required" },
                 { status: 400 }
             );
         }
@@ -39,7 +41,7 @@ export async function PATCH(
                 instructorId: decoded.userId,
             },
             { isPublished },
-            { new: true }
+            { returnDocument: "after" }
         );
 
         if (!course) {
@@ -50,10 +52,12 @@ export async function PATCH(
         }
 
         return NextResponse.json({ course });
-    } catch {
+    } catch (error) {
+        console.error("PUBLISH_COURSE_ERROR", error);
+
         return NextResponse.json(
-            { message: "Server error" },
-            { status: 500 }
+            { message: "Invalid or expired token" },
+            { status: 401 }
         );
     }
 }

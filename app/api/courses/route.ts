@@ -5,6 +5,8 @@ import { UserRole } from "@/shared/enum/UserRole.enum";
 import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/auth";
 
+
+// public api for fetching all Course
 export async function GET() {
     try {
         await connectDB();
@@ -25,6 +27,7 @@ export async function GET() {
 }
 
 
+// api for Creating Course
 export async function POST(req: NextRequest) {
     try {
         await connectDB();

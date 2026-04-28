@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { clearAuthCookie } from "@/lib/cookies";
 
+
+// logout api
 export async function POST() {
     const response = NextResponse.json({
         message: "Logged out successfully",

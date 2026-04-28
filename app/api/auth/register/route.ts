@@ -9,6 +9,8 @@ import InstructorModel from "@/models/instructor.model";
 import LearnerModel from "@/models/learner.model";
 import { EducationLevel } from "@/shared/enum/EducationLevel.enum";
 
+
+// register api
 export async function POST(req: NextRequest) {
     try {
         await connectDB();

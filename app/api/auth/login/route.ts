@@ -5,6 +5,8 @@ import { attachAuthCookie } from "@/lib/cookies";
 import UserModel from "@/models/user.model";
 import bcrypt from 'bcrypt';
 
+
+// login api
 export async function POST(req: NextRequest) {
     try {
         await connectDB();

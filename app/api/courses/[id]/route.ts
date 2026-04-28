@@ -4,6 +4,8 @@ import CourseModel from "@/models/course.model";
 import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/auth";
 
+
+// api for get Course by Id
 export async function GET(
     req: NextRequest,
     context: { params: Promise<{ id: string }> }
@@ -43,6 +45,7 @@ export async function GET(
 }
 
 
+// api for Update Course
 export async function PATCH(
     req: NextRequest,
     context: { params: Promise<{ id: string }> }
@@ -53,7 +56,7 @@ export async function PATCH(
         const { id } = await context.params;
         if (!id) {
             return NextResponse.json(
-                { success: false, message: "Supplier ID is required" },
+                { success: false, message: "ID is required" },
                 { status: 400 }
             );
         }
@@ -100,6 +103,7 @@ export async function PATCH(
 }
 
 
+// api for Delete Course
 export async function DELETE(
     req: NextRequest,
     context: { params: Promise<{ id: string }> }
@@ -110,7 +114,7 @@ export async function DELETE(
         const { id } = await context.params;
         if (!id) {
             return NextResponse.json(
-                { success: false, message: "Supplier ID is required" },
+                { success: false, message: "ID is required" },
                 { status: 400 }
             );
         }

@@ -15,6 +15,7 @@ type UpdatableFields = Partial<{
 }>;
 
 
+// api for get my Profile (instructor)
 export async function GET() {
     try {
         await connectDB();
@@ -56,6 +57,7 @@ export async function GET() {
 }
 
 
+// api for update my Profile (instructor)
 export async function PATCH(req: NextRequest) {
     try {
         await connectDB();
