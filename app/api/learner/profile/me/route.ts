@@ -33,8 +33,8 @@ export async function GET() {
         const decoded = verifyToken(token);
 
         const learner = await LearnerModel.findOne({
-            learnerId: decoded.userId,
-        }).populate("learnerId", "name email role");
+            userId: decoded.userId,
+        }).populate("userId", "name email role");
 
         if (!learner) {
             return NextResponse.json(
@@ -125,7 +125,7 @@ export async function PATCH(req: NextRequest) {
         }
 
         const learner = await LearnerModel.findOneAndUpdate(
-            { learnerId: decoded.userId },
+            { userId: decoded.userId },
             { $set: updateData },
             { returnDocument: "after" }
         );
