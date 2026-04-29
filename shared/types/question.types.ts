@@ -8,7 +8,7 @@ export interface IOptions {
 export interface IQuestion {
     quizId: Types.ObjectId;
     questionText: string;
-    options: IOptions;
+    options: IOptions[];
     correctOptionId: string;
 }
 

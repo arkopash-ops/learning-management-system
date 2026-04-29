@@ -5,20 +5,26 @@ const QuestionSchema = new Schema<QuestionDocument>({
     quizId: {
         type: Schema.Types.ObjectId,
         ref: "Quiz",
-        index: true
+        required: true,
+        index: true,
     },
 
     questionText: {
         type: String,
+        required: true,
         trim: true,
     },
 
     options: [{
-        optionId: { type: String },
-        text: { type: String },
+        optionId: { type: String, required: true, },
+        text: { type: String, required: true, },
     }],
 
-    correctOptionId: { type: String },
+    correctOptionId: {
+        type: String,
+        required: true,
+        select: false,
+    },
 }, { timestamps: true });
 
 const QuestionModel = models.Question ||
