@@ -6,7 +6,7 @@ const ModuleSchema = new Schema<ModuleDocument>({
         type: Schema.Types.ObjectId,
         ref: "Course",
         required: true,
-        unique: true,
+        index: true,
     },
 
     title: {
@@ -27,7 +27,8 @@ const ModuleSchema = new Schema<ModuleDocument>({
 
     quizId: {
         type: Schema.Types.ObjectId,
-        ref: "Quiz"
+        ref: "Quiz",
+        default: null,
     },
 
     totalLessons: {

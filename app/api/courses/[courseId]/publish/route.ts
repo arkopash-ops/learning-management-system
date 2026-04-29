@@ -8,13 +8,13 @@ import { verifyToken } from "@/lib/auth";
 // api for publish and unpublish Course
 export async function PATCH(
     req: NextRequest,
-    context: { params: Promise<{ id: string }> }
+    context: { params: Promise<{ courseId: string }> }
 ) {
     try {
         await connectDB();
 
-        const { id } = await context.params;
-        if (!id) {
+        const { courseId } = await context.params;
+        if (!courseId) {
             return NextResponse.json(
                 { success: false, message: "ID is required" },
                 { status: 400 }
@@ -37,7 +37,7 @@ export async function PATCH(
 
         const course = await CourseModel.findOneAndUpdate(
             {
-                _id: id,
+                _id: courseId,
                 instructorId: decoded.userId,
             },
             { isPublished },
