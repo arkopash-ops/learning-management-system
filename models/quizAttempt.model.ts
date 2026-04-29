@@ -5,36 +5,55 @@ const QuizAttemptSchema = new Schema<QuizAttemptDocument>({
     quizId: {
         type: Schema.Types.ObjectId,
         ref: "Quiz",
-        index: true
+        index: true,
+        required: true
     },
 
     learnerId: {
         type: Schema.Types.ObjectId,
-        ref: "Learner",
-        index: true
+        ref: "User",
+        index: true,
+        required: true,
     },
 
     courseId: {
         type: Schema.Types.ObjectId,
         ref: "Course",
-        index: true
+        index: true,
+        required: true,
     },
 
     answers: [{
-        questionId: { 
+        questionId: {
             type: Schema.Types.ObjectId,
-            ref:"Question",
+            ref: "Question",
         },
-        
+
         selectedOptionId: { type: String },
+
+        required: true,
     }],
 
-    score: { type: Number },
+    score: {
+        type: Number,
+        default: 0,
+    },
 
-    passed: { type: Boolean },
+    passed: {
+        type: Boolean,
+        default: false
+    },
 
-    attemptNumber: { type: Number },
+    attemptNumber: {
+        type: Number,
+        required: true,
+    },
 });
+
+QuizAttemptSchema.index(
+    { quizId: 1, learnerId: 1, attemptNumber: 1 },
+    { unique: true }
+);
 
 const QuizAttemptModel = models.QuizAttempt ||
     model<QuizAttemptDocument>("QuizAttempt", QuizAttemptSchema);

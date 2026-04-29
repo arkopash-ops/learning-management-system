@@ -9,7 +9,7 @@ export interface IQuizAttempts {
     quizId: Types.ObjectId;
     learnerId: Types.ObjectId;
     courseId: Types.ObjectId;
-    answers: IAnswer;
+    answers: IAnswer[];
     score: number;
     passed: boolean;
     attemptNumber: number;
