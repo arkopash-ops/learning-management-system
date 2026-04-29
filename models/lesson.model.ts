@@ -11,19 +11,23 @@ const ResourcesSchema = new Schema({
     label: { type: String },
 
     url: { type: String },
-});
+
+    publicId: { type: String },
+}, { _id: false });
 
 const LessonSchema = new Schema<LessonDocument>({
     courseId: {
         type: Schema.Types.ObjectId,
         ref: "Course",
-        index: true
+        index: true,
+        required: true,
     },
 
     moduleId: {
         type: Schema.Types.ObjectId,
         ref: "Module",
-        index: true
+        index: true,
+        required: true,
     },
 
     title: {
@@ -39,12 +43,18 @@ const LessonSchema = new Schema<LessonDocument>({
 
     order: {
         type: Number,
-        required: true
+        required: true,
     },
 
-    videoUrl: { type: String },
+    videoUrl: {
+        type: String,
+        default: "",
+    },
 
-    videoDurationSec: { type: Number },
+    videoDurationSec: {
+        type: Number,
+        default: 0,
+    },
 
     readingContent: { type: String },
 
@@ -52,7 +62,7 @@ const LessonSchema = new Schema<LessonDocument>({
 
     isPreview: {
         type: Boolean,
-        default: false
+        default: false,
     },
 }, { timestamps: true });
 

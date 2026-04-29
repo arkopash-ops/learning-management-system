@@ -5,6 +5,7 @@ export interface IResources {
     type: ResourcesTypes;
     label: string;
     url: string;
+    publicId: string,
 };
 
 export interface ILesson {
@@ -16,7 +17,7 @@ export interface ILesson {
     videoUrl: string;
     videoDurationSec: number;
     readingContent: string;
-    resources: IResources;
+    resources: IResources[];
     isPreview: boolean;
 };
 
