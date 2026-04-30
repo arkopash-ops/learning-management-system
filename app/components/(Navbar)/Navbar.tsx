@@ -10,6 +10,11 @@ const roleRoutes: Record<UserRole, string> = {
   [UserRole.LEARNER]: "/learner/dashboard",
 };
 
+const profileRoutes: Partial<Record<UserRole, string>> = {
+  [UserRole.INSTRUCTOR]: "/instructor/profile",
+  [UserRole.LEARNER]: "/learner/profile",
+};
+
 const roleLabels: Record<UserRole, string> = {
   [UserRole.ADMIN]: "Admin",
   [UserRole.INSTRUCTOR]: "Instructor",
@@ -41,6 +46,7 @@ const getHomeRoute = (role: UserRole | null) => {
 const Navbar = async () => {
   const role = await getUserRole();
   const dashboardHref = role ? roleRoutes[role] : null;
+  const profileHref = role ? (profileRoutes[role] ?? null) : null;
   const homeHref = getHomeRoute(role);
 
   return (
@@ -64,7 +70,7 @@ const Navbar = async () => {
                 Dashboard
               </Link>
 
-              <NavbarActions />
+              <NavbarActions profileHref={profileHref} />
             </>
           ) : (
             <>

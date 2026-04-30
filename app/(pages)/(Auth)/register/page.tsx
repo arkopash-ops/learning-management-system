@@ -5,6 +5,18 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/app/components/(Toast)/ToastProvider";
 
+const getNextRoute = (role: string) => {
+  if (role === "instructor") {
+    return "/instructor/profile?completeProfile=1";
+  }
+
+  if (role === "learner") {
+    return "/learner/profile?completeProfile=1";
+  }
+
+  return `/${role}/dashboard`;
+};
+
 export default function Register() {
   const router = useRouter();
   const { showToast } = useToast();
@@ -86,7 +98,7 @@ export default function Register() {
 
       showToast("Registration successful", "success");
 
-      router.replace(`/${data.user.role}/dashboard`);
+      router.replace(getNextRoute(data.user.role));
       router.refresh();
     } catch {
       showToast("Something went wrong", "error");

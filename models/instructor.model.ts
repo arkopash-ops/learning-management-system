@@ -5,7 +5,7 @@ const EducationSchema = new Schema({
     degree: { type: String },
     institution: { type: String },
     year: { type: String },
-});
+}, { _id: false });
 
 const InstructorSchema = new Schema<InstructoreDocument>({
     userId: {

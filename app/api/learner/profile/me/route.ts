@@ -105,13 +105,16 @@ export async function PATCH(req: NextRequest) {
         }
 
         if (body.educationLevel !== undefined) {
-            if (typeof body.educationLevel !== "string") {
+            if (
+                typeof body.educationLevel !== "string" ||
+                !Object.values(EducationLevel).includes(body.educationLevel)
+            ) {
                 return NextResponse.json(
                     { message: "Select proper Education Level" },
                     { status: 400 }
                 );
             }
-            updateData.educationLevel = body.educationLevel.trim();
+            updateData.educationLevel = body.educationLevel;
         }
 
         if (body.interests !== undefined) {
@@ -121,7 +124,10 @@ export async function PATCH(req: NextRequest) {
                     { status: 400 }
                 );
             }
-            updateData.interests = body.interests;
+            updateData.interests = body.interests
+                .filter((interest: unknown) => typeof interest === "string")
+                .map((interest: string) => interest.trim())
+                .filter(Boolean);
         }
 
         const learner = await LearnerModel.findOneAndUpdate(

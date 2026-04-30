@@ -5,6 +5,68 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/app/components/(Toast)/ToastProvider";
 
+interface InstructorProfileResponse {
+  instructor?: {
+    subjects: string[];
+    bio: string;
+    dateOfBirth: string | null;
+    education: unknown[];
+  };
+}
+
+interface LearnerProfileResponse {
+  learner?: {
+    bio: string;
+    dateOfBirth: string | null;
+    educationLevel: string;
+    interests: string[];
+  };
+}
+
+const getNextRoute = async (role: string) => {
+  if (role === "instructor") {
+    const res = await fetch("/api/instructor/profile/me");
+    const data = (await res.json()) as InstructorProfileResponse;
+
+    if (!res.ok || !data.instructor) {
+      return "/instructor/profile?completeProfile=1";
+    }
+
+    const { instructor } = data;
+    const isIncomplete =
+      !instructor.bio ||
+      !instructor.dateOfBirth ||
+      instructor.subjects.length === 0 ||
+      instructor.education.length === 0;
+
+    return isIncomplete
+      ? "/instructor/profile?completeProfile=1"
+      : "/instructor/dashboard";
+  }
+
+  if (role === "learner") {
+    const res = await fetch("/api/learner/profile/me");
+    const data = (await res.json()) as LearnerProfileResponse;
+
+    if (!res.ok || !data.learner) {
+      return "/learner/profile?completeProfile=1";
+    }
+
+    const { learner } = data;
+    const isIncomplete =
+      !learner.bio ||
+      !learner.dateOfBirth ||
+      !learner.educationLevel ||
+      learner.interests.length === 0;
+
+    return isIncomplete
+      ? "/learner/profile?completeProfile=1"
+      : "/learner/dashboard";
+  }
+
+  return `/${role}/dashboard`;
+};
+
 export default function Login() {
   const router = useRouter();
   const { showToast } = useToast();
@@ -72,7 +134,9 @@ export default function Login() {
 
       const role = data.user.role;
 
-      router.replace(`/${role}/dashboard`);
+      const nextRoute = await getNextRoute(role);
+
+      router.replace(nextRoute);
       router.refresh();
     } catch {
       showToast("Something went wrong", "error");
