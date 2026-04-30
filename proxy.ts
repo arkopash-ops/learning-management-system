@@ -15,7 +15,7 @@ const protectedRoutes: Array<{ prefix: string; role: UserRole }> = [
   { prefix: "/learner", role: UserRole.LEARNER },
 ];
 
-const publicAuthRoutes = ["/login", "/register"];
+const publicAuthRoutes = ["/", "/login", "/register"];
 
 const getDashboardForRole = (role: string) =>
   roleRoutes[role as UserRole] ?? "/login";
@@ -65,5 +65,6 @@ export const config = {
     "/learner/:path*",
     "/login",
     "/register",
+    "/",
   ],
 };
