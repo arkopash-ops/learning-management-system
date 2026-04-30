@@ -1,5 +1,8 @@
+import CertificateModel from "@/models/certificate.model";
 import EnrollmentModel from "@/models/enrollment.model";
 import ModuleModel from "@/models/module.model";
+import { issueCertificate } from "./issueCertificate";
+import CourseModel from "@/models/course.model";
 
 
 // function to update Cource progress after 
@@ -30,9 +33,21 @@ export async function updateCourseProgress(
 
     enrollment.progressPercent = progress;
 
-    if (progress === 100) {
+    const course = await CourseModel.findById(courseId);
+
+    if (progress === 100 && enrollment.status !== "completed") {
         enrollment.status = "completed";
         enrollment.completedAt = new Date();
+
+        const cert = await CertificateModel.findOne({ learnerId, courseId });
+
+        if (!cert) {
+            await issueCertificate({
+                learnerId,
+                courseId,
+                issuedBy: course.instructorId
+            });
+        }
     }
 
     enrollment.lastActivityAt = new Date();
