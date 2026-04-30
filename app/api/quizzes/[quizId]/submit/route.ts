@@ -6,6 +6,9 @@ import QuizAttemptModel from "@/models/quizAttempt.model";
 import { UserRole } from "@/shared/enum/UserRole.enum";
 import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/auth";
+import ModuleModel from "@/models/module.model";
+import EnrollmentModel from "@/models/enrollment.model";
+import { updateCourseProgress } from "@/lib/updateCourseProgress";
 
 
 // api for submit Quiz and show 
@@ -103,6 +106,42 @@ export async function POST(
             passed,
             attemptNumber,
         });
+
+        if (passed) {
+            const myModule = await ModuleModel.findOne({ quizId: quizId });
+
+            if (myModule) {
+                const enrollment = await EnrollmentModel.findOne({
+                    learnerId: decoded.userId,
+                    courseId: quiz.courseId,
+                });
+
+                if (enrollment) {
+                    if (!enrollment.completedModules.includes(myModule._id)) {
+                        enrollment.completedModules.push(myModule._id);
+                    }
+
+                    const nextModule = await ModuleModel.findOne({
+                        courseId: myModule.courseId,
+                        order: myModule.order + 1,
+                    });
+
+                    if (
+                        nextModule &&
+                        !enrollment.unlockedModules.includes(nextModule._id)
+                    ) {
+                        enrollment.unlockedModules.push(nextModule._id);
+                    }
+
+                    await enrollment.save();
+
+                    await updateCourseProgress(
+                        decoded.userId,
+                        quiz.courseId.toString()
+                    );
+                }
+            }
+        }
 
         return NextResponse.json({
             message: "Quiz submitted",
