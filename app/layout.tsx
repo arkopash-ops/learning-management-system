@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import Navbar from "./components/(Navbar)/Navbar";
+import Footer from "./components/Footer";
+import ToastProvider from "./components/(Toast)/ToastProvider";
 
 export const metadata: Metadata = {
   title: "Mini Learning Management System",
@@ -13,8 +16,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full antialiased">
-      <body className="min-h-full flex flex-col">{children}</body>
+    <html lang="en">
+      <body>
+        <Navbar />
+        <main className="min-h-screen flex flex-col bg-linear-to-br from-gray-50 to-gray-200 px-6">
+          <div className="flex-1 flex items-center justify-center">
+            <ToastProvider>{children}</ToastProvider>
+          </div>
+        </main>
+        <Footer />
+      </body>
     </html>
   );
 }

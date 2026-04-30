@@ -23,16 +23,21 @@ const QuizAttemptSchema = new Schema<QuizAttemptDocument>({
         required: true,
     },
 
-    answers: [{
-        questionId: {
-            type: Schema.Types.ObjectId,
-            ref: "Question",
-        },
+    answers: {
+        type: [{
+            questionId: {
+                type: Schema.Types.ObjectId,
+                ref: "Question",
+                required: true,
+            },
 
-        selectedOptionId: { type: String },
-
+            selectedOptionId: {
+                type: String,
+                required: true,
+            },
+        }],
         required: true,
-    }],
+    },
 
     score: {
         type: Number,
