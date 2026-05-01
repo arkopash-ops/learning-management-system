@@ -98,6 +98,7 @@ export async function GET(
         title: moduleItem.title,
         description: moduleItem.description,
         order: moduleItem.order,
+        quizId: moduleItem.quizId,
         totalLessons: moduleItem.totalLessons,
         lessons: moduleLessons,
       };

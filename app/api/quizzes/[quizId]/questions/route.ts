@@ -24,9 +24,34 @@ export async function GET(
             );
         }
 
+        const cookieStore = await cookies();
+        const token = cookieStore.get("token")?.value;
+        let shouldShowCorrectOption = false;
+
+        if (token) {
+            try {
+                const decoded = verifyToken(token);
+
+                if (decoded.role === UserRole.INSTRUCTOR) {
+                    const quiz = await QuizModel.findById(quizId);
+
+                    if (quiz) {
+                        const course = await CourseModel.findOne({
+                            _id: quiz.courseId,
+                            instructorId: decoded.userId,
+                        });
+
+                        shouldShowCorrectOption = Boolean(course);
+                    }
+                }
+            } catch {
+                shouldShowCorrectOption = false;
+            }
+        }
+
         const questions = await QuestionModel.find({
             quizId: quizId,
-        }).select("-correctOptionId");
+        }).select(shouldShowCorrectOption ? "+correctOptionId" : "-correctOptionId");
 
         return NextResponse.json({ questions });
     } catch {

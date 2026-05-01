@@ -8,6 +8,7 @@ import {
   FaEdit,
   FaBookOpen,
   FaPlus,
+  FaQuestionCircle,
   FaRegTrashAlt,
   FaSave,
   FaTimes,
@@ -418,6 +419,13 @@ function ModuleManager() {
                         >
                           <FaBookOpen className="h-3.5 w-3.5" />
                           Lessons
+                        </Link>
+                        <Link
+                          href={`/quiz?moduleId=${module._id}&moduleTitle=${encodeURIComponent(module.title)}&courseId=${courseId}&courseTitle=${encodeURIComponent(courseTitle)}`}
+                          className="inline-flex items-center gap-2 rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 transition hover:bg-gray-100"
+                        >
+                          <FaQuestionCircle className="h-3.5 w-3.5" />
+                          Quiz
                         </Link>
                         <button
                           type="button"

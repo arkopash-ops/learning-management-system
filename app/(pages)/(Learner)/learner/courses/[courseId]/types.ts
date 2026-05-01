@@ -27,6 +27,7 @@ export interface ModuleItem {
   title: string;
   description?: string;
   order: number;
+  quizId?: string | null;
   totalLessons: number;
   lessons: LessonItem[];
 }
@@ -86,5 +87,6 @@ export interface LearnerModule {
   title: string;
   description?: string;
   order: number;
+  quizId?: string | null;
   lessons: LearnerLesson[];
 }

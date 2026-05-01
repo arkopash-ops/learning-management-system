@@ -1,5 +1,6 @@
 "use client";
 
+import LearnerQuizPanel from "./LearnerQuizPanel";
 import LessonCard from "./LessonCard";
 import type { LearnerModule } from "./types";
 import { FiLock } from "react-icons/fi";
@@ -52,11 +53,16 @@ export default function LessonContent({
           </div>
 
           <div className="border-t border-gray-200 p-4">
-            <LessonCard
-              key={selectedLesson._id}
-              lesson={selectedLesson}
-              isUnlocked
-            />
+            <div className="space-y-4">
+              <LessonCard
+                key={selectedLesson._id}
+                lesson={selectedLesson}
+                isUnlocked
+              />
+              {selectedModule.quizId && (
+                <LearnerQuizPanel moduleId={selectedModule._id} />
+              )}
+            </div>
           </div>
         </div>
       ) : selectedLesson && selectedModule ? (

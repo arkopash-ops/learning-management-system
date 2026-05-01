@@ -5,6 +5,7 @@ import CourseModel from "@/models/course.model";
 import { cookies } from "next/headers";
 import { verifyToken } from "@/lib/auth";
 import ModuleModel from "@/models/module.model";
+import QuestionModel from "@/models/question.model";
 
 
 // api for update Quiz
@@ -125,6 +126,7 @@ export async function DELETE(
             );
         }
 
+        await QuestionModel.deleteMany({ quizId });
         await QuizModel.findByIdAndDelete(quizId);
 
         await ModuleModel.findOneAndUpdate(

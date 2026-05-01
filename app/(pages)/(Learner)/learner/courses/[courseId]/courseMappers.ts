@@ -19,6 +19,7 @@ export const toLearnerModules = (modules: ModuleItem[]): LearnerModule[] =>
     title: mod.title,
     description: mod.description,
     order: mod.order,
+    quizId: mod.quizId ? String(mod.quizId) : null,
     lessons: mod.lessons.map((lesson) => ({
       _id: String(lesson._id),
       title: lesson.title,
