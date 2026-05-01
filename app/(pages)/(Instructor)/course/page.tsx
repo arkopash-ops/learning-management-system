@@ -280,9 +280,6 @@ export default function Course() {
       <section className="w-full rounded-xl border bg-white p-6 shadow-md">
         <div className="flex flex-col gap-2 border-b border-gray-200 pb-5 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="text-sm font-medium text-gray-500">
-              Instructor workspace
-            </p>
             <h1 className="mt-1 text-2xl font-bold text-gray-900">
               Course Management
             </h1>

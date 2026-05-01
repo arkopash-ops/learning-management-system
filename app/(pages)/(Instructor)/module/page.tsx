@@ -54,11 +54,10 @@ const getErrorMessage = (value: unknown, fallback: string) => {
   ) {
     return value.message;
   }
-
   return fallback;
 };
 
-function ModuleManager() {
+export default function Modules() {
   const searchParams = useSearchParams();
   const { showToast } = useToast();
 
@@ -76,9 +75,7 @@ function ModuleManager() {
   const nextOrder = useMemo(() => getNextOrder(modules), [modules]);
 
   useEffect(() => {
-    if (!courseId) {
-      return;
-    }
+    if (!courseId) return;
 
     const loadModules = async () => {
       try {
@@ -91,6 +88,7 @@ function ModuleManager() {
         }
 
         const loadedModules = Array.isArray(data.modules) ? data.modules : [];
+
         setModules(loadedModules);
         setForm((current) =>
           current.order
@@ -180,6 +178,7 @@ function ModuleManager() {
           body: JSON.stringify(payload),
         },
       );
+
       const data = await res.json();
 
       if (!res.ok) {
@@ -208,6 +207,7 @@ function ModuleManager() {
       });
 
       resetForm();
+
       showToast(
         editingModuleId
           ? "Module updated successfully"
@@ -231,6 +231,7 @@ function ModuleManager() {
       const res = await fetch(`/api/modules/${moduleId}`, {
         method: "DELETE",
       });
+
       const data = await res.json();
 
       if (!res.ok) {
@@ -240,9 +241,7 @@ function ModuleManager() {
 
       setModules((current) => current.filter((item) => item._id !== moduleId));
 
-      if (editingModuleId === moduleId) {
-        resetForm();
-      }
+      if (editingModuleId === moduleId) resetForm();
 
       showToast("Module deleted successfully", "success");
     } catch {
@@ -252,34 +251,17 @@ function ModuleManager() {
     }
   };
 
-  if (!courseId) {
-    return (
-      <main className="w-full self-start p-3">
-        <section className="w-full rounded-xl border bg-white p-6 shadow-md">
-          <Link
-            href="/course"
-            className="inline-flex items-center gap-2 rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 transition hover:bg-gray-100"
-          >
-            <FaArrowLeft className="h-3.5 w-3.5" />
-            Courses
-          </Link>
-
-          <div className="mt-6 rounded-lg border border-dashed border-gray-300 bg-gray-50 p-6 text-center">
-            <h1 className="text-lg font-semibold text-gray-900">
-              Select a course first
-            </h1>
-            <p className="mt-1 text-sm text-gray-600">
-              Open modules from a course card to manage its module list.
-            </p>
-          </div>
-        </section>
-      </main>
-    );
-  }
-
   return (
-    <main className="w-full self-start p-3">
-      <section className="w-full rounded-xl border bg-white p-6 shadow-md">
+    <Suspense
+      fallback={
+        <main className="w-full self-start p-3">
+          <section className="w-full rounded-xl border bg-white p-6 shadow-md">
+            <p className="text-sm text-gray-600">Loading modules...</p>
+          </section>
+        </main>
+      }
+    >
+      <section className="w-full self-start mt-3 rounded-xl border bg-white p-6 shadow-md">
         <div className="flex flex-col gap-3 border-b border-gray-200 pb-5 md:flex-row md:items-end md:justify-between">
           <div>
             <Link
@@ -464,22 +446,6 @@ function ModuleManager() {
           </div>
         </div>
       </section>
-    </main>
-  );
-}
-
-export default function Modules() {
-  return (
-    <Suspense
-      fallback={
-        <main className="w-full self-start p-3">
-          <section className="w-full rounded-xl border bg-white p-6 shadow-md">
-            <p className="text-sm text-gray-600">Loading modules...</p>
-          </section>
-        </main>
-      }
-    >
-      <ModuleManager />
     </Suspense>
   );
 }
