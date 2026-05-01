@@ -15,6 +15,7 @@ export interface ILesson {
     description: string;
     order: number;
     videoUrl: string;
+    videoPublicId: string;
     videoDurationSec: number;
     readingContent: string;
     resources: IResources[];

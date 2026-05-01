@@ -51,6 +51,11 @@ const LessonSchema = new Schema<LessonDocument>({
         default: "",
     },
 
+    videoPublicId: {
+        type: String,
+        default: "",
+    },
+
     videoDurationSec: {
         type: Number,
         default: 0,
