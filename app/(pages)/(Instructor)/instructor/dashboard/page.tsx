@@ -5,6 +5,7 @@ import { verifyToken } from "@/lib/auth";
 import { connectDB } from "@/lib/db";
 import InstructorModel from "@/models/instructor.model";
 import { UserRole } from "@/shared/enum/UserRole.enum";
+import "@/models/user.model";
 
 interface Education {
   degree?: string;

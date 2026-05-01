@@ -6,6 +6,7 @@ import { connectDB } from "@/lib/db";
 import LearnerModel from "@/models/learner.model";
 import { EducationLevel } from "@/shared/enum/EducationLevel.enum";
 import { UserRole } from "@/shared/enum/UserRole.enum";
+import "@/models/user.model";
 
 interface LearnerDashboardProfile {
   userId: {

@@ -1,10 +1,12 @@
 "use client";
 
+import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import {
   FaEdit,
   FaEye,
   FaEyeSlash,
+  FaLayerGroup,
   FaPlus,
   FaRegTrashAlt,
   FaSave,
@@ -74,7 +76,9 @@ export default function Course() {
   const [editingCourseId, setEditingCourseId] = useState<string | null>(null);
 
   const tagPreview = useMemo(() => splitTags(form.tags), [form.tags]);
-  const editingCourse = courses.find((course) => course._id === editingCourseId);
+  const editingCourse = courses.find(
+    (course) => course._id === editingCourseId,
+  );
 
   useEffect(() => {
     const loadCourses = async () => {
@@ -172,7 +176,10 @@ export default function Course() {
 
       if (!res.ok) {
         showToast(
-          getErrorMessage(data, editingCourseId ? "Course update failed" : "Course creation failed"),
+          getErrorMessage(
+            data,
+            editingCourseId ? "Course update failed" : "Course creation failed",
+          ),
           "error",
         );
         return;
@@ -189,7 +196,9 @@ export default function Course() {
       );
       resetForm();
       showToast(
-        editingCourseId ? "Course updated successfully" : "Course created successfully",
+        editingCourseId
+          ? "Course updated successfully"
+          : "Course created successfully",
         "success",
       );
     } catch {
@@ -281,7 +290,9 @@ export default function Course() {
 
           <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-700">
             Total Course:{" "}
-            <span className="font-semibold text-gray-900">{courses.length}</span>
+            <span className="font-semibold text-gray-900">
+              {courses.length}
+            </span>
           </div>
         </div>
 
@@ -440,16 +451,17 @@ export default function Course() {
                         )}
 
                         <div className="mt-3 flex flex-wrap gap-2">
-                          {(course.tags?.length ? course.tags : ["untagged"]).map(
-                            (tag) => (
-                              <span
-                                key={tag}
-                                className="rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-xs text-gray-700"
-                              >
-                                {tag}
-                              </span>
-                            ),
-                          )}
+                          {(course.tags?.length
+                            ? course.tags
+                            : ["untagged"]
+                          ).map((tag) => (
+                            <span
+                              key={tag}
+                              className="rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-xs text-gray-700"
+                            >
+                              {tag}
+                            </span>
+                          ))}
                         </div>
 
                         <div className="mt-3 flex flex-wrap gap-4 text-xs text-gray-500">
@@ -459,6 +471,13 @@ export default function Course() {
                       </div>
 
                       <div className="flex shrink-0 flex-wrap gap-2">
+                        <Link
+                          href={`/module?courseId=${course._id}&courseTitle=${encodeURIComponent(course.title)}`}
+                          className="inline-flex items-center gap-2 rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 transition hover:bg-gray-100"
+                        >
+                          <FaLayerGroup className="h-3.5 w-3.5" />
+                          Modules
+                        </Link>
                         <button
                           type="button"
                           onClick={() => handleEdit(course)}
