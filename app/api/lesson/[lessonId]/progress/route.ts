@@ -38,7 +38,7 @@ export async function POST(
 
         const decoded = verifyToken(token);
 
-        const { watchedSeconds, currentPosition } = await req.json();
+        const { watchedSeconds, currentPosition, durationSeconds } = await req.json();
 
         if (watchedSeconds === undefined || currentPosition === undefined) {
             return NextResponse.json(
@@ -53,6 +53,29 @@ export async function POST(
             return NextResponse.json(
                 { message: "Lesson not found" },
                 { status: 404 }
+            );
+        }
+
+        const enrollment = await EnrollmentModel.findOne({
+            learnerId: decoded.userId,
+            courseId: lesson.courseId,
+        });
+
+        if (!enrollment) {
+            return NextResponse.json(
+                { message: "Not enrolled in this course" },
+                { status: 403 }
+            );
+        }
+
+        const isModuleUnlocked = enrollment.unlockedModules.some(
+            (id: Types.ObjectId) => id.toString() === lesson.moduleId.toString()
+        );
+
+        if (!isModuleUnlocked) {
+            return NextResponse.json(
+                { message: "Module is locked" },
+                { status: 403 }
             );
         }
 
@@ -75,10 +98,15 @@ export async function POST(
             { new: true, upsert: true }
         );
 
-        // 90% completion
-        const completionThreshold = lesson.videoDurationSec * 0.9;
+        const effectiveDurationSec = lesson.videoDurationSec || durationSeconds || 0;
+        const completionThreshold = lesson.videoUrl
+            ? effectiveDurationSec * 0.9
+            : 0;
+        const canCompleteLesson = lesson.videoUrl
+            ? completionThreshold > 0 && watchedSeconds >= completionThreshold
+            : watchedSeconds >= 0;
 
-        if (!progress.isCompleted && watchedSeconds >= completionThreshold) {
+        if (!progress.isCompleted && canCompleteLesson) {
             progress.isCompleted = true;
             progress.completedAt = new Date();
             await progress.save();
@@ -94,11 +122,6 @@ export async function POST(
             });
 
             if (totalLessons > 0 && totalLessons === completedLessons) {
-                const enrollment = await EnrollmentModel.findOne({
-                    learnerId: decoded.userId,
-                    courseId: lesson.courseId,
-                });
-
                 if (enrollment) {
                     const moduleIdStr = lesson.moduleId.toString();
 
@@ -176,6 +199,38 @@ export async function GET(
         }
 
         const decoded = verifyToken(token);
+
+        const lesson = await LessonModel.findById(lessonId);
+
+        if (!lesson) {
+            return NextResponse.json(
+                { message: "Lesson not found" },
+                { status: 404 }
+            );
+        }
+
+        const enrollment = await EnrollmentModel.findOne({
+            learnerId: decoded.userId,
+            courseId: lesson.courseId,
+        });
+
+        if (!enrollment) {
+            return NextResponse.json(
+                { message: "Not enrolled in this course" },
+                { status: 403 }
+            );
+        }
+
+        const isModuleUnlocked = enrollment.unlockedModules.some(
+            (id: Types.ObjectId) => id.toString() === lesson.moduleId.toString()
+        );
+
+        if (!isModuleUnlocked) {
+            return NextResponse.json(
+                { message: "Module is locked" },
+                { status: 403 }
+            );
+        }
 
         const progress = await LessonProgressModel.findOne({
             learnerId: decoded.userId,

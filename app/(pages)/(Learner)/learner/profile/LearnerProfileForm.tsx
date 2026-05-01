@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { FaUserCircle } from "react-icons/fa";
 import { useToast } from "@/app/components/(Toast)/ToastProvider";
 import { EducationLevel } from "@/shared/enum/EducationLevel.enum";
 
@@ -31,6 +32,16 @@ const isProfileIncomplete = (profile: LearnerProfile) =>
   !profile.educationLevel ||
   profile.interests.length === 0;
 
+const formatDate = (value: string | null) => {
+  if (!value) return "Not added";
+
+  return new Intl.DateTimeFormat("en", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  }).format(new Date(value));
+};
+
 export default function LearnerProfileForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -46,6 +57,7 @@ export default function LearnerProfileForm() {
   const [interestsText, setInterestsText] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [editing, setEditing] = useState(shouldCompleteProfile);
 
   const incomplete = useMemo(
     () => (profile ? isProfileIncomplete(profile) : false),
@@ -134,6 +146,8 @@ export default function LearnerProfileForm() {
       if (shouldCompleteProfile) {
         router.replace("/learner/dashboard");
         router.refresh();
+      } else {
+        setEditing(false);
       }
     } catch {
       showToast("Something went wrong while saving profile", "error");
@@ -142,11 +156,84 @@ export default function LearnerProfileForm() {
     }
   };
 
+  const resetForm = () => {
+    if (!profile) return;
+
+    setBio(profile.bio ?? "");
+    setDateOfBirth(formatDateForInput(profile.dateOfBirth));
+    setEducationLevel(profile.educationLevel);
+    setInterestsText(profile.interests.join(", "));
+    setEditing(false);
+  };
+
   if (loading) {
     return (
       <div className="w-full max-w-3xl rounded-xl border bg-white p-6 shadow-md">
         <p className="text-sm text-gray-600">Loading profile...</p>
       </div>
+    );
+  }
+
+  if (!editing && profile && !incomplete) {
+    return (
+      <section className="w-full max-w-4xl rounded-xl border bg-white p-6 shadow-md">
+        <div className="flex flex-col gap-5 border-b border-gray-200 pb-6 md:flex-row md:items-start md:justify-between">
+          <div className="flex min-w-0 gap-4">
+            <FaUserCircle className="h-20 w-20 shrink-0 text-gray-300" />
+
+            <div className="min-w-0">
+              <h1 className="text-3xl font-bold text-gray-900">
+                {profile.userId.name}
+              </h1>
+              <a
+                href={`mailto:${profile.userId.email}`}
+                className="mt-1 inline-block text-sm text-blue-600 hover:underline"
+              >
+                {profile.userId.email}
+              </a>
+              <p className="mt-2 text-sm text-gray-600">
+                <span className="font-medium text-gray-700">DOB:</span>{" "}
+                {formatDate(profile.dateOfBirth)}
+              </p>
+              <p className="mt-1 text-sm text-gray-600">
+                <span className="font-medium text-gray-700">Education:</span>{" "}
+                {profile.educationLevel}
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setEditing(true)}
+            className="w-fit rounded-lg bg-black px-5 py-2 text-sm font-medium text-white transition hover:opacity-90"
+          >
+            Edit Profile
+          </button>
+        </div>
+
+        <div className="grid gap-6 pt-5 md:grid-cols-[1.2fr_0.8fr]">
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900">Bio</h2>
+            <p className="mt-2 leading-7 text-gray-600">
+              {profile.bio.trim()}
+            </p>
+          </div>
+
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900">Interests</h2>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {profile.interests.map((interest) => (
+                <span
+                  key={interest}
+                  className="rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-sm text-gray-700"
+                >
+                  {interest}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
     );
   }
 
@@ -228,11 +315,17 @@ export default function LearnerProfileForm() {
         <div className="flex justify-end gap-3">
           <button
             type="button"
-            onClick={() => router.push("/learner/dashboard")}
+            onClick={() =>
+              shouldCompleteProfile || incomplete
+                ? router.push("/learner/dashboard")
+                : resetForm()
+            }
             disabled={shouldCompleteProfile || incomplete}
             className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            Dashboard
+            {editing && !shouldCompleteProfile && !incomplete
+              ? "Cancel"
+              : "Dashboard"}
           </button>
           <button
             type="submit"

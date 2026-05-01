@@ -134,7 +134,7 @@ export async function PATCH(req: NextRequest) {
             { userId: decoded.userId },
             { $set: updateData },
             { returnDocument: "after" }
-        );
+        ).populate("userId", "name email role");
 
         if (!learner) {
             return NextResponse.json(
