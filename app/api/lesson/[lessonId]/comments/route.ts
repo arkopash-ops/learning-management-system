@@ -6,6 +6,54 @@ import { verifyToken } from "@/lib/auth";
 import DiscussionThreadModel from "@/models/discussionThreads.model";
 import DiscussionCommentModel from "@/models/discussionComments.model";
 import { CommentNode } from "@/shared/types/comment.types";
+import { UserRole } from "@/shared/enum/UserRole.enum";
+import CourseModel from "@/models/course.model";
+import EnrollmentModel from "@/models/enrollment.model";
+import { EnrollStatus } from "@/shared/enum/EnrollStatus.enum";
+import UserModel from "@/models/user.model";
+
+type LeanComment = {
+    _id: { toString: () => string };
+    threadId: { toString: () => string };
+    courseId: { toString: () => string };
+    lessonId: { toString: () => string };
+    authorId: {
+        _id?: { toString: () => string };
+        name?: string;
+        role?: string;
+        toString: () => string;
+    };
+    parentCommentId?: { toString: () => string } | null;
+    comment: string;
+    createdAt: Date;
+    updatedAt: Date;
+};
+
+async function canAccessLessonComments(
+    user: { userId: string; role: string },
+    lesson: { courseId: unknown },
+) {
+    if (user.role === UserRole.INSTRUCTOR) {
+        const course = await CourseModel.findOne({
+            _id: lesson.courseId,
+            instructorId: user.userId,
+        }).select("_id");
+
+        return Boolean(course);
+    }
+
+    if (user.role === UserRole.LEARNER) {
+        const enrollment = await EnrollmentModel.findOne({
+            courseId: lesson.courseId,
+            learnerId: user.userId,
+            status: { $in: [EnrollStatus.ENROLLED, EnrollStatus.COMPLETED] },
+        }).select("_id");
+
+        return Boolean(enrollment);
+    }
+
+    return false;
+}
 
 
 // api for post a Comments on Lesson
@@ -36,8 +84,9 @@ export async function POST(
 
         const user = verifyToken(token);
         const { comment, parentCommentId } = await req.json();
+        const commentText = typeof comment === "string" ? comment.trim() : "";
 
-        if (!comment) {
+        if (!commentText) {
             return NextResponse.json(
                 { message: "Comment required" },
                 { status: 400 }
@@ -49,6 +98,14 @@ export async function POST(
             return NextResponse.json(
                 { message: "Lesson not found" },
                 { status: 404 }
+            );
+        }
+
+        const hasAccess = await canAccessLessonComments(user, lesson);
+        if (!hasAccess) {
+            return NextResponse.json(
+                { message: "Forbidden" },
+                { status: 403 }
             );
         }
 
@@ -64,13 +121,28 @@ export async function POST(
             });
         }
 
+        if (parentCommentId) {
+            const parentComment = await DiscussionCommentModel.findOne({
+                _id: parentCommentId,
+                threadId: thread._id,
+                lessonId: lesson._id,
+            }).select("_id");
+
+            if (!parentComment) {
+                return NextResponse.json(
+                    { message: "Parent comment not found" },
+                    { status: 404 }
+                );
+            }
+        }
+
         const newComment = await DiscussionCommentModel.create({
             threadId: thread._id,
             courseId: lesson.courseId,
             lessonId: lesson._id,
             authorId: user.userId,
             parentCommentId: parentCommentId || null,
-            comment,
+            comment: commentText,
         });
 
         await DiscussionThreadModel.findByIdAndUpdate(thread._id, {
@@ -109,6 +181,34 @@ export async function GET(
             );
         }
 
+        const cookieStore = await cookies();
+        const token = cookieStore.get("token")?.value;
+
+        if (!token) {
+            return NextResponse.json(
+                { message: "Unauthorized" },
+                { status: 401 }
+            );
+        }
+
+        const user = verifyToken(token);
+        const lesson = await LessonModel.findById(lessonId);
+
+        if (!lesson) {
+            return NextResponse.json(
+                { message: "Lesson not found" },
+                { status: 404 }
+            );
+        }
+
+        const hasAccess = await canAccessLessonComments(user, lesson);
+        if (!hasAccess) {
+            return NextResponse.json(
+                { message: "Forbidden" },
+                { status: 403 }
+            );
+        }
+
         const thread = await DiscussionThreadModel.findOne({
             lessonId: lessonId,
         });
@@ -118,8 +218,9 @@ export async function GET(
         }
 
         const comments = await DiscussionCommentModel.find({ threadId: thread._id })
+            .populate({ path: "authorId", model: UserModel, select: "name role" })
             .sort({ createdAt: 1 })
-            .lean();
+            .lean<LeanComment[]>();
 
         const map: Record<string, CommentNode> = {};
         const roots: CommentNode[] = [];
@@ -133,7 +234,9 @@ export async function GET(
                 threadId: c.threadId.toString(),
                 courseId: c.courseId.toString(),
                 lessonId: c.lessonId.toString(),
-                authorId: c.authorId.toString(),
+                authorId: c.authorId._id?.toString() ?? c.authorId.toString(),
+                authorName: c.authorId.name,
+                authorRole: c.authorId.role,
                 parentCommentId: c.parentCommentId
                     ? c.parentCommentId.toString()
                     : null,
@@ -152,15 +255,18 @@ export async function GET(
                     roots.push(map[currentId]);
                 }
             } else {
-                roots.push(map[c._id]);
+                roots.push(map[c._id.toString()]);
             }
         });
 
         return NextResponse.json({
             thread,
+            currentUserId: user.userId,
             comments: roots,
         });
-    } catch {
+    } catch (error) {
+        console.error("GET_COMMENTS_ERROR", error);
+
         return NextResponse.json(
             { message: "Server error" },
             { status: 500 }

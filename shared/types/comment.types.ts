@@ -4,6 +4,8 @@ export type CommentNode = {
     courseId: string;
     lessonId: string;
     authorId: string;
+    authorName?: string;
+    authorRole?: string;
     parentCommentId: string | null;
     comment: string;
     createdAt: Date;

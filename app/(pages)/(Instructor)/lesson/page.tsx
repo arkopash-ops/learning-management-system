@@ -7,11 +7,13 @@ import {
   FaArrowLeft,
   FaEdit,
   FaPlus,
+  FaRegCommentDots,
   FaRegTrashAlt,
   FaSave,
   FaTimes,
 } from "react-icons/fa";
 import { useToast } from "@/app/components/(Toast)/ToastProvider";
+import LessonComments from "@/app/components/LessonComments";
 
 type ResourceType = "pdf" | "file" | "link";
 
@@ -144,6 +146,7 @@ export default function Lessons() {
   const [saving, setSaving] = useState(false);
   const [activeLessonId, setActiveLessonId] = useState<string | null>(null);
   const [editingLessonId, setEditingLessonId] = useState<string | null>(null);
+  const [commentLessonId, setCommentLessonId] = useState<string | null>(null);
 
   const nextOrder = useMemo(() => getNextOrder(lessons), [lessons]);
 
@@ -773,6 +776,18 @@ export default function Lessons() {
                         <div className="flex shrink-0 flex-wrap gap-2">
                           <button
                             type="button"
+                            onClick={() =>
+                              setCommentLessonId((current) =>
+                                current === lesson._id ? null : lesson._id,
+                              )
+                            }
+                            className="inline-flex items-center gap-2 rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 transition hover:bg-gray-100"
+                          >
+                            <FaRegCommentDots className="h-3.5 w-3.5" />
+                            Comments
+                          </button>
+                          <button
+                            type="button"
                             onClick={() => handleEdit(lesson)}
                             className="inline-flex items-center gap-2 rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 transition hover:bg-gray-100"
                           >
@@ -790,6 +805,16 @@ export default function Lessons() {
                           </button>
                         </div>
                       </div>
+
+                      {commentLessonId === lesson._id && (
+                        <div className="mt-4 border-t border-gray-100 pt-4">
+                          <LessonComments
+                            lessonId={lesson._id}
+                            title={`${lesson.title} comments`}
+                            compact
+                          />
+                        </div>
+                      )}
                     </article>
                   ))}
                 </div>

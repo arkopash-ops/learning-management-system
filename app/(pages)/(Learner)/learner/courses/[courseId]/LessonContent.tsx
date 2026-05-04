@@ -3,6 +3,7 @@
 import LessonCard from "./LessonCard";
 import type { LearnerModule } from "./types";
 import { FiLock } from "react-icons/fi";
+import LessonComments from "@/app/components/LessonComments";
 
 interface LessonContentProps {
   modules: LearnerModule[];
@@ -58,6 +59,7 @@ export default function LessonContent({
                 lesson={selectedLesson}
                 isUnlocked
               />
+              <LessonComments lessonId={selectedLesson._id} />
             </div>
           </div>
         </div>

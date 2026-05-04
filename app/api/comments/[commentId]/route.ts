@@ -6,6 +6,22 @@ import DiscussionCommentModel from "@/models/discussionComments.model";
 import DiscussionThreadModel from "@/models/discussionThreads.model";
 
 
+async function collectReplyIds(commentIds: string[]) {
+    const allIds = [...commentIds];
+    let parentIds = commentIds;
+
+    while (parentIds.length > 0) {
+        const replies = await DiscussionCommentModel.find({
+            parentCommentId: { $in: parentIds },
+        }).select("_id");
+
+        parentIds = replies.map((reply) => reply._id.toString());
+        allIds.push(...parentIds);
+    }
+
+    return allIds;
+}
+
 // api for delete Commement
 export async function DELETE(
     req: Request,
@@ -49,14 +65,20 @@ export async function DELETE(
             );
         }
 
-        await DiscussionCommentModel.findByIdAndDelete(commentId);
+        const commentIdsToDelete = await collectReplyIds([commentId]);
+
+        await DiscussionCommentModel.deleteMany({
+            _id: { $in: commentIdsToDelete },
+        });
 
         await DiscussionThreadModel.findByIdAndUpdate(comment.threadId, {
-            $inc: { totalComments: -1 },
+            $inc: { totalComments: -commentIdsToDelete.length },
         });
 
         return NextResponse.json({ message: "Deleted" });
-    } catch {
+    } catch (error) {
+        console.error("DELETE_COMMENT_ERROR", error);
+
         return NextResponse.json(
             { message: "Server error" },
             { status: 500 }
