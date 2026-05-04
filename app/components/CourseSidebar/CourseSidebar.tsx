@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { FiLock, FiCheck, FiChevronRight } from "react-icons/fi";
+import { FiLock, FiCheck, FiChevronRight, FiHelpCircle } from "react-icons/fi";
 
 export interface SidebarLesson {
   _id: string;
@@ -13,6 +13,7 @@ export interface SidebarModule {
   _id: string;
   title: string;
   order: number;
+  quizId?: string | null;
   lessons: SidebarLesson[];
 }
 
@@ -21,9 +22,12 @@ export interface CourseSidebarProps {
   modules: SidebarModule[];
   unlockedModules: string[];
   completedModules: string[];
+  quizUnlockedModules: string[];
   progressPercent: number;
   currentLessonId?: string;
+  currentQuizModuleId?: string;
   onLessonSelect?: (lessonId: string) => void;
+  onQuizSelect?: (moduleId: string) => void;
 }
 
 export default function CourseSidebar({
@@ -31,9 +35,12 @@ export default function CourseSidebar({
   modules,
   unlockedModules,
   completedModules,
+  quizUnlockedModules,
   progressPercent,
   currentLessonId,
+  currentQuizModuleId,
   onLessonSelect,
+  onQuizSelect,
 }: CourseSidebarProps) {
   const validModuleIds = new Set(modules.map((mod) => mod._id));
   const normalizedUnlockedModules = Array.from(
@@ -42,13 +49,20 @@ export default function CourseSidebar({
   const normalizedCompletedModules = Array.from(
     new Set(completedModules.filter((id) => validModuleIds.has(id))),
   );
+  const normalizedQuizUnlockedModules = Array.from(
+    new Set(quizUnlockedModules.filter((id) => validModuleIds.has(id))),
+  );
   const currentLessonModuleId = modules.find((mod) =>
     mod.lessons.some((lesson) => lesson._id === currentLessonId),
+  )?._id;
+  const currentQuizModuleIdInCourse = modules.find(
+    (mod) => mod._id === currentQuizModuleId && mod.quizId,
   )?._id;
   const firstUnlockedModuleId =
     modules.find((mod) => normalizedUnlockedModules.includes(mod._id))?._id ??
     modules[0]?._id;
-  const initialOpenModuleId = currentLessonModuleId ?? firstUnlockedModuleId;
+  const initialOpenModuleId =
+    currentLessonModuleId ?? currentQuizModuleIdInCourse ?? firstUnlockedModuleId;
   const initialOpen = modules.reduce<Record<string, boolean>>((acc, mod) => {
     acc[mod._id] = mod._id === initialOpenModuleId;
     return acc;
@@ -111,8 +125,13 @@ export default function CourseSidebar({
         {modules.map((mod, idx) => {
           const isUnlocked = normalizedUnlockedModules.includes(mod._id);
           const isCompleted = normalizedCompletedModules.includes(mod._id);
+          const isQuizUnlocked = normalizedQuizUnlockedModules.includes(
+            mod._id,
+          );
           const isOpen =
-            openModules[mod._id] || mod._id === currentLessonModuleId;
+            openModules[mod._id] ||
+            mod._id === currentLessonModuleId ||
+            mod._id === currentQuizModuleIdInCourse;
 
           return (
             <div
@@ -196,6 +215,48 @@ export default function CourseSidebar({
                       </li>
                     );
                   })}
+
+                  {mod.quizId && (
+                    <li>
+                      <button
+                        type="button"
+                        onClick={() => onQuizSelect?.(mod._id)}
+                        disabled={!isQuizUnlocked}
+                        className={`flex w-full items-center gap-3 px-4 py-2.5 text-left text-xs transition ${
+                          currentQuizModuleIdInCourse === mod._id
+                            ? "bg-white text-gray-900"
+                            : ""
+                        } ${
+                          isQuizUnlocked
+                            ? "hover:bg-white"
+                            : "cursor-not-allowed opacity-60"
+                        }`}
+                      >
+                        <span
+                          className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-semibold ring-1 ${
+                            currentQuizModuleIdInCourse === mod._id
+                              ? "bg-gray-900 text-white ring-gray-900"
+                              : "bg-white text-gray-500 ring-gray-200"
+                          }`}
+                        >
+                          {isQuizUnlocked ? (
+                            <FiHelpCircle size={12} />
+                          ) : (
+                            <FiLock size={11} />
+                          )}
+                        </span>
+                        <span
+                          className={`truncate ${
+                            currentQuizModuleIdInCourse === mod._id
+                              ? "font-semibold text-gray-900"
+                              : "text-gray-700"
+                          }`}
+                        >
+                          Quiz
+                        </span>
+                      </button>
+                    </li>
+                  )}
                 </ul>
               )}
             </div>

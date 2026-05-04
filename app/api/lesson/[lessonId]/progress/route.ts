@@ -124,6 +124,16 @@ export async function POST(
             if (totalLessons > 0 && totalLessons === completedLessons) {
                 if (enrollment) {
                     const moduleIdStr = lesson.moduleId.toString();
+                    const currentModule = await ModuleModel.findById(lesson.moduleId);
+
+                    if (currentModule?.quizId) {
+                        await enrollment.save();
+
+                        return NextResponse.json({
+                            message: "Progress saved",
+                            progress,
+                        });
+                    }
 
                     // addnig to completeModules
                     if (!enrollment.completedModules.some(
@@ -133,8 +143,6 @@ export async function POST(
                     }
 
                     // unlocking next module
-                    const currentModule = await ModuleModel.findById(lesson.moduleId);
-
                     const nextModule = await ModuleModel.findOne({
                         courseId: lesson.courseId,
                         order: (currentModule?.order || 0) + 1,

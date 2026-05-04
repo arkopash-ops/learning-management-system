@@ -30,6 +30,7 @@ export default async function LearnerLessonPage({
       learnerModules={viewModel.learnerModules}
       unlockedModules={viewModel.unlockedModules}
       completedModules={viewModel.completedModules}
+      quizUnlockedModules={viewModel.quizUnlockedModules}
       progressPercent={viewModel.progressPercent}
       initialLessonId={lessonId}
     >

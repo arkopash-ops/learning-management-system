@@ -7,10 +7,16 @@ import { getCourseViewModel } from "./courseViewModel";
 
 export default async function CourseOverviewPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ courseId: string }>;
+  searchParams: Promise<{ quizModuleId?: string | string[] }>;
 }) {
   const { courseId } = await params;
+  const query = await searchParams;
+  const selectedQuizModuleId = Array.isArray(query.quizModuleId)
+    ? query.quizModuleId[0]
+    : query.quizModuleId;
   const token = (await cookies()).get("token")?.value ?? "";
   const viewModel = await getCourseViewModel(courseId, token);
 
@@ -41,7 +47,9 @@ export default async function CourseOverviewPage({
       learnerModules={viewModel.learnerModules}
       unlockedModules={viewModel.unlockedModules}
       completedModules={viewModel.completedModules}
+      quizUnlockedModules={viewModel.quizUnlockedModules}
       progressPercent={viewModel.progressPercent}
+      selectedQuizModuleId={selectedQuizModuleId}
     >
       {courseOverview}
     </CourseLearningShell>

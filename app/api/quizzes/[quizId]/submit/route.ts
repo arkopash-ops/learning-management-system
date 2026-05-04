@@ -9,6 +9,9 @@ import { verifyToken } from "@/lib/auth";
 import ModuleModel from "@/models/module.model";
 import EnrollmentModel from "@/models/enrollment.model";
 import { updateCourseProgress } from "@/lib/updateCourseProgress";
+import LessonModel from "@/models/lesson.model";
+import LessonProgressModel from "@/models/lessonProgress.model";
+import { Types } from "mongoose";
 
 
 // api for submit Quiz and show 
@@ -64,6 +67,58 @@ export async function POST(
             );
         }
 
+        const myModule = await ModuleModel.findOne({ quizId: quizId });
+
+        if (!myModule) {
+            return NextResponse.json(
+                { message: "Quiz module not found" },
+                { status: 404 }
+            );
+        }
+
+        const enrollment = await EnrollmentModel.findOne({
+            learnerId: decoded.userId,
+            courseId: quiz.courseId,
+        });
+
+        if (!enrollment) {
+            return NextResponse.json(
+                { message: "Complete enrollment is required to attempt quiz" },
+                { status: 403 }
+            );
+        }
+
+        const isModuleUnlocked = enrollment.unlockedModules.some(
+            (moduleId: Types.ObjectId) =>
+                moduleId.toString() === myModule._id.toString()
+        );
+
+        if (!isModuleUnlocked) {
+            return NextResponse.json(
+                { message: "Module is locked" },
+                { status: 403 }
+            );
+        }
+
+        const [totalModuleLessons, completedModuleLessons] = await Promise.all([
+            LessonModel.countDocuments({ moduleId: myModule._id }),
+            LessonProgressModel.countDocuments({
+                learnerId: decoded.userId,
+                moduleId: myModule._id,
+                isCompleted: true,
+            }),
+        ]);
+
+        if (
+            totalModuleLessons === 0 ||
+            completedModuleLessons < totalModuleLessons
+        ) {
+            return NextResponse.json(
+                { message: "Complete all module lessons to unlock the quiz" },
+                { status: 403 }
+            );
+        }
+
         const questions = await QuestionModel.find({
             quizId: quizId,
         }).select("+correctOptionId");
@@ -108,16 +163,12 @@ export async function POST(
         });
 
         if (passed) {
-            const myModule = await ModuleModel.findOne({ quizId: quizId });
-
             if (myModule) {
-                const enrollment = await EnrollmentModel.findOne({
-                    learnerId: decoded.userId,
-                    courseId: quiz.courseId,
-                });
-
                 if (enrollment) {
-                    if (!enrollment.completedModules.includes(myModule._id)) {
+                    if (!enrollment.completedModules.some(
+                        (moduleId: Types.ObjectId) =>
+                            moduleId.toString() === myModule._id.toString()
+                    )) {
                         enrollment.completedModules.push(myModule._id);
                     }
 
@@ -128,7 +179,10 @@ export async function POST(
 
                     if (
                         nextModule &&
-                        !enrollment.unlockedModules.includes(nextModule._id)
+                        !enrollment.unlockedModules.some(
+                            (moduleId: Types.ObjectId) =>
+                                moduleId.toString() === nextModule._id.toString()
+                        )
                     ) {
                         enrollment.unlockedModules.push(nextModule._id);
                     }

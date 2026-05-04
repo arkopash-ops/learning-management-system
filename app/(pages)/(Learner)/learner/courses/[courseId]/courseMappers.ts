@@ -6,6 +6,7 @@ export const toSidebarModules = (modules: ModuleItem[]): SidebarModule[] =>
     _id: String(mod._id),
     title: mod.title,
     order: mod.order,
+    quizId: mod.quizId ? String(mod.quizId) : null,
     lessons: mod.lessons.map((lesson) => ({
       _id: String(lesson._id),
       title: lesson.title,

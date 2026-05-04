@@ -5,11 +5,7 @@ import {
   getEnrollmentCourseId,
   getMyEnrollments,
 } from "./courseData";
-import {
-  getLessonProgressPercent,
-  toLearnerModules,
-  toSidebarModules,
-} from "./courseMappers";
+import { toLearnerModules, toSidebarModules } from "./courseMappers";
 
 const getValidCourseModuleIds = (modules: LearnerModule[]) =>
   new Set(modules.map((moduleItem) => moduleItem._id));
@@ -25,6 +21,19 @@ const normalizeModuleIds = (
         .filter((moduleId) => validModuleIds.has(moduleId)),
     ),
   );
+
+const getQuizUnlockedModuleIds = (modules: LearnerModule[]) =>
+  modules
+    .filter((moduleItem) => {
+      if (!moduleItem.quizId || moduleItem.lessons.length === 0) {
+        return false;
+      }
+
+      return moduleItem.lessons.every(
+        (lesson) => lesson.progress?.isCompleted,
+      );
+    })
+    .map((moduleItem) => moduleItem._id);
 
 export async function getCourseViewModel(courseId: string, token: string) {
   const [data, myEnrollmentsData, courseContentData] = await Promise.all([
@@ -52,6 +61,10 @@ export async function getCourseViewModel(courseId: string, token: string) {
     enrollment?.completedModules,
     validModuleIds,
   );
+  const enrollmentProgressPercent =
+    typeof enrollment?.progressPercent === "number"
+      ? Math.round(enrollment.progressPercent)
+      : 0;
 
   return {
     course: data.course,
@@ -62,7 +75,8 @@ export async function getCourseViewModel(courseId: string, token: string) {
     completedModules,
     learnerModules,
     sidebarModules: toSidebarModules(contentModules),
-    progressPercent: getLessonProgressPercent(learnerModules),
+    quizUnlockedModules: getQuizUnlockedModuleIds(learnerModules),
+    progressPercent: enrollmentProgressPercent,
   };
 }
 

@@ -32,6 +32,7 @@ export async function updateCourseProgress(
             : (completedModules / totalModules) * 100;
 
     enrollment.progressPercent = progress;
+    enrollment.lastActivityAt = new Date();
 
     const course = await CourseModel.findById(courseId);
 
@@ -39,18 +40,20 @@ export async function updateCourseProgress(
         enrollment.status = "completed";
         enrollment.completedAt = new Date();
 
+        await enrollment.save();
+
         const cert = await CertificateModel.findOne({ learnerId, courseId });
 
-        if (!cert) {
+        if (!cert && course) {
             await issueCertificate({
                 learnerId,
                 courseId,
                 issuedBy: course.instructorId
             });
         }
-    }
 
-    enrollment.lastActivityAt = new Date();
+        return;
+    }
 
     await enrollment.save();
 }

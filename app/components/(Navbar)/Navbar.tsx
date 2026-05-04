@@ -79,6 +79,15 @@ const Navbar = async () => {
                 </Link>
               )}
 
+              {role === UserRole.LEARNER && (
+                <Link
+                  href="/learner/courses"
+                  className="rounded-lg px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-100"
+                >
+                  My Courses
+                </Link>
+              )}
+
               <NavbarActions profileHref={profileHref} />
             </>
           ) : (
